@@ -83,7 +83,7 @@ def getSeasonStats(year,table):
         counter += 1
 
 
-    print(stats)
+    
 
     # Return the dictionaries
     return(stats)

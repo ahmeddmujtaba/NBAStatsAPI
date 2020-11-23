@@ -8,7 +8,6 @@ import unicodedata
 def playerInfo(playerID):
 
     url = f'https://www.basketball-reference.com/players/{playerID}.html'
-    print(url)
     page = requests.get(url)
 
     name = ''
@@ -76,7 +75,6 @@ def playerInfo(playerID):
         if str(a).find("https://twitter.com/") != -1:
             social = str(a).replace("<a href=","").split(">")[0].replace('"','')
 
-    print(social)
 
     accolades = []
 
@@ -127,4 +125,3 @@ def playerInfo(playerID):
 
 
 
-playerInfo('d/duranke01')

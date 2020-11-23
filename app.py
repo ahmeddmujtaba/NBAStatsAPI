@@ -55,6 +55,7 @@ firebase = firebase.FirebaseApplication("https://bballdb-88bae.firebaseio.com/",
 
 
 app = flask.Flask(__name__)
+
 app.config["DEBUG"] = True
 
 
@@ -80,14 +81,21 @@ def getRidOfAllAccents(stats):
 # Example: http://127.0.0.1:5000/player/stats?name=stephencurry&type=advanced
 @app.route('/player/stats', methods=['GET'])
 def playerStatsF():
-    print(request.args['name'])
     playerID = getPlayerId(request.args['name'])
     statType = request.args['type']
-    print('yes')
-    print(statType)
-    answer = getStats(playerID,statType)
+    answer = firebase.get(f'/bballdb-88bae/seasons/player/{playerID}/stats', statType)
+    if answer == None:
+        try:
+            answer = getStats(playerID,statType)
+        except (HTTPError,KeyError,TypeError):
+            answer = {"N/A":["N/A","N/A","N/A","N/A","N/A","N/A"],"NA":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"],"Legend":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]}
+        try:
+            result = firebase.put(f'/bballdb-88bae/seasons/player/{playerID}/stats', statType,answer)
+        except (HTTPError,TypeError) as e:
+                print(e, " - Exception Occured")
     try:
         del answer[""]
+        answer = {"N/A":["N/A","N/A","N/A","N/A","N/A","N/A"],"NA":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"],"Legend":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]}
     except KeyError:
         pass
     return(answer)
@@ -96,7 +104,6 @@ def playerStatsF():
 @app.route('/player/image' ,methods=['GET'])
 def imageURLFetcher():
     player = request.args['name']
-    print(player)
     playerID = getPlayerId(player)
     answer = firebase.get(f'/bballdb-88bae/seasons/player/{player}', 'src')
     if answer == None:
@@ -105,9 +112,8 @@ def imageURLFetcher():
             try:
                 result = firebase.put(f'/bballdb-88bae/player/{player}/imageURL/', 'src', answer)
             except (HTTPError,TypeError) as e:
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
-            print('tried it ')
             answer = 'N/A'
         
     return(answer)
@@ -233,18 +239,15 @@ def postPlayerInfo():
         except KeyError:
             pass
         try:
-            print('done')
             playerName = str(playerName).replace('*','')
             result = firebase.put(f'/bballdb-88bae/player/{playerName}/stats/',statType,answer)
         except HTTPError:
-            print('pass')
+            print("HTTP Exception Occured")
             pass
         
         return(answer)
     else:
-        print('yes')
         answer = firebase.get(f'/bballdb-88bae/player/{playerName}/stats/',statType)
-        print(answer)
         return(answer)
 
 
@@ -254,22 +257,18 @@ def postPlayerInfo():
 def postPlayerInformation():
     playerName = request.args['name']
     playerId = getPlayerId(playerName)
-    print(playerId)
     if request.method == 'POST':
         answer = playerInfo(playerId)
-        print(answer)
         try:
-            print('done')
             playerName = str(playerName).replace('*','')
             result = firebase.put(f'/bballdb-88bae/player/{playerName}/', 'Info',answer)
         except HTTPError:
-            print('pass')
+            print("HTTP Exception Occured")
             pass
 
         return(answer)
     else:
         answer = firebase.get(f'/bballdb-88bae/player/{playerName}/','Info')
-        print(type(answer))
         return(answer)
 
 # Returns certain stat of a certain type for a franchise for all its years
@@ -277,24 +276,20 @@ def postPlayerInformation():
 # Example: http://127.0.0.1:5000/team/franchiseStats?team=DAL&statType=Basic&stat=TeamStats
 @app.route('/team/franchiseStats', methods=['POST','GET'])
 def postTeamFranchiseStats():
-    print('yes')
     teamName = request.args['team']
     statType = request.args['statType']
     stat = request.args['stat']
-    print(teamName)
     if request.method == 'POST':
         answer = franchiseStats(teamStatsReferenceDict[statType][stat],teamName)
         try:
-            print('done')
             result = firebase.put(f'/bballdb-88bae/teams/{teamName}/franchisestats/{statType}/', f'{stat}',answer)
         except HTTPError:
-            print('pass')
+            print("HTTP Exception Occured")
             pass
 
         return(answer)
     else:
         answer = firebase.get(f'/bballdb-88bae/teams/{teamName}/franchisestats/{statType}/', f'{stat}')
-        print(answer['Legend'])
         return(answer)
 
 
@@ -303,17 +298,14 @@ def postTeamFranchiseStats():
 # Example: http://127.0.0.1:5000/team/depthChart?team=DAL&year=2020
 @app.route('/team/depthChart', methods=['POST','GET'])
 def postTeamDepthChart():
-    print('yes')
     teamName = request.args['team']
     year = request.args['year']
-    print(teamName)
     if request.method == 'POST':
         answer = depthChart(teamName,year)
         try:
-            print('done')
             result = firebase.put(f'/bballdb-88bae/teams/{teamName}/depthChart', str(year),answer)
         except HTTPError:
-            print('pass')
+            print("HTTP Exception Occured")
             pass
 
         return(answer)
@@ -326,14 +318,12 @@ def postTeamDepthChart():
 @app.route('/team/contracts', methods=['POST','GET'])
 def postTeamContracts():
     teamName = request.args['team']
-    print(teamName)
     if request.method == 'POST':
         answer = getContractStats(teamName)
         try:
-            print('done')
             result = firebase.put(f'/bballdb-88bae/teams/{teamName}/', 'Contracts',answer)
         except AttributeError:
-            print('pass')
+            print("Exception Occured")
             pass
 
         return(answer)
@@ -348,20 +338,17 @@ def postTeamContracts():
 @app.route('/team/coachStats', methods=['POST','GET'])
 def postCoachStats():
     teamName = request.args['team']
-    print(teamName)
     if request.method == 'POST':
         answer = getCoachStats(teamName)
         try:
-            print('done')
             result = firebase.put(f'/bballdb-88bae/teams/{teamName}', 'CoachStats',answer)
         except HTTPError:
-            print('pass')
+            print("HTTP Exception Occured")
             pass
 
         return(answer)
     else:
         answer = firebase.get(f'/bballdb-88bae/teams/{teamName}', 'CoachStats')
-        print(answer)
         if answer == None:
             answer = getCoachStats(teamName)
         return(answer)
@@ -373,20 +360,17 @@ def postCoachStats():
 def postFranchiseLeaders():
     teamName = request.args['team']
     statType = request.args['type']
-    print(teamName)
     if request.method == 'POST':
         answer = getFranchiseLeadersStats(teamLeadersDict[statType],teamName)
         try:
-            print('done')
             result = firebase.put(f'/bballdb-88bae/teams/{teamName}/franchiseLeaders/', statType,answer)
         except HTTPError:
-            print('pass')
+            print("HTTP Exception Occured")
             pass
 
         return(answer)
     else:
         answer = firebase.get(f'/bballdb-88bae/teams/{teamName}/franchiseLeaders', statType)
-        print(answer)
         if answer == None:
             answer = getFranchiseLeadersStats(teamLeadersDict[statType],teamName)
         return(answer)
@@ -397,14 +381,12 @@ def postFranchiseLeaders():
 def postSeasonLeaders():
     teamName = request.args['team']
     year = request.args['year']
-    print(teamName)
     if request.method == 'POST':
         answer = getFranchiseSeasonLeadersStats(year,teamName)
         try:
-            print('done')
             result = firebase.put(f'/bballdb-88bae/teams/{teamName}/seasonLeaders', str(year),answer)
         except HTTPError:
-            print('pass')
+            print("HTTP Exception Occured")
             pass
 
         return(answer)
@@ -428,7 +410,7 @@ def postTeamSeasonStats():
             try:
                 result = firebase.put(f'/bballdb-88bae/teams/{teamName}/seasonStats/', stat, answer)
             except HTTPError:
-                print('pass')
+                print("HTTP Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -446,7 +428,7 @@ def postTeamGameLog():
             try:
                 result = firebase.put(f'/bballdb-88bae/teams/{teamName}/', 'gamelog', answer)
             except (HTTPError,TypeError) as e:
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -464,7 +446,7 @@ def postTeamSchedule():
             try:
                 result = firebase.put(f'/bballdb-88bae/teams/{teamName}/', 'schedule', answer)
             except (HTTPError,TypeError) as e:
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -483,7 +465,7 @@ def postTeamStartingLineups():
             try:
                 result = firebase.put(f'/bballdb-88bae/teams/{teamName}/startinglineups', year, answer)
             except (HTTPError,TypeError) as e:
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -503,7 +485,7 @@ def postTeamStartingLineups2():
             try:
                 result = firebase.put(f'/bballdb-88bae/teams/{teamName}/startinglineups2', year, answer)
             except (HTTPError,TypeError) as e:
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -522,7 +504,7 @@ def postTeamOnOff():
             try:
                 result = firebase.put(f'/bballdb-88bae/teams/{teamName}/onoff', year, answer)
             except (HTTPError,TypeError) as e:
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -541,7 +523,7 @@ def postTeamSplits():
             try:
                 result = firebase.put(f'/bballdb-88bae/teams/{teamName}/splits', year, answer)
             except (HTTPError,TypeError) as e:
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -561,7 +543,7 @@ def postTeamLineups():
             try:
                 result = firebase.put(f'/bballdb-88bae/teams/{teamName}/lineups/{year}', stat, answer)
             except (HTTPError,TypeError) as e:
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -582,7 +564,7 @@ def postSeasonAllStars():
             try:
                 result = firebase.put(f'/bballdb-88bae/seasons/allstarrosters/{year}', stat, answer)
             except (HTTPError,TypeError) as e:
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -600,7 +582,7 @@ def postLeagueLeaders():
             try:
                 result = firebase.put(f'/bballdb-88bae/seasons/leagueseasonleaders', year, answer)
             except (HTTPError,TypeError) as e:
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -619,14 +601,14 @@ def postPlayerStats():
             try:
                 result = firebase.put(f'/bballdb-88bae/seasons/playerstats/{year}', stat, answer)
             except (HTTPError,TypeError) as e:
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
     return(answer)
 
 # Returns team stats for current year
-# Example: http://127.0.0.1:5000/season/stats?year=2020&stat=PerGame
+# Example: http://127.0.0.1:5000/season/teamstats?year=2020&stat=PerGame
 @app.route('/season/teamstats', methods=['GET'])
 def postSeasonStats():
     year = request.args['year']
@@ -638,7 +620,7 @@ def postSeasonStats():
             try:
                 result = firebase.put(f'/bballdb-88bae/seasons/stats/{year}', stat, answer)
             except (HTTPError,TypeError) as e:
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -655,8 +637,7 @@ def postSeasonLeagueIndex():
             try:
                 result = firebase.put(f'/bballdb-88bae/seasons', 'leagueindex' ,answer)
             except (HTTPError,TypeError) as e:
-                print()
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -672,8 +653,7 @@ def postSeasonPer100():
             try:
                 result = firebase.put(f'/bballdb-88bae/seasons', 'leagueper100' ,answer)
             except (HTTPError,TypeError) as e:
-                print()
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -689,8 +669,7 @@ def postSeasonLeaguePerGame():
             try:
                 result = firebase.put(f'/bballdb-88bae/seasons', 'leaguepergame' ,answer)
             except (HTTPError,TypeError) as e:
-                print()
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -708,8 +687,7 @@ def allTimeLeaders():
             try:
                 result = firebase.put(f'/bballdb-88bae/leaders/alltime', stat ,answer)
             except (HTTPError,TypeError) as e:
-                print()
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -727,8 +705,7 @@ def postSeasonAllTimeLeaders():
             try:
                 result = firebase.put(f'/bballdb-88bae/leaders/alltimeplayoffs', stat ,answer)
             except (HTTPError,TypeError) as e:
-                print()
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -747,8 +724,7 @@ def singleSeasonLeaders():
             try:
                 result = firebase.put(f'/bballdb-88bae/leaders/singleseason', stat ,answer)
             except (HTTPError,TypeError) as e:
-                print()
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
@@ -767,11 +743,11 @@ def singleSeasonPlayoffLeaders():
             try:  
                 result = firebase.put(f'/bballdb-88bae/leaders/singleseasonplayoffs', stat ,answer)
             except (HTTPError,TypeError) as e:
-                print()
-                print('pass')
+                print(e, " - Exception Occured")
         except AttributeError:
             answer = 'N/A'
         
     return(answer)
 
-app.run()
+if __name__ == '__main__':
+    app.run()

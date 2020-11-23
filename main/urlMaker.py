@@ -48,7 +48,6 @@ def urlMaker():
             lastYear = int(tr.findAll('td')[0].text)
             yearsInNba = lastYear - firstYear
             firstYear = int(tr.findAll('td')[1].text)
-            #print(currentPlayer,yearsInNba)
             if th.find('strong'):
                 currentPlayer = True
 
@@ -56,14 +55,10 @@ def urlMaker():
                 playerName = strip_accents(th.text).lower().replace(' ','')
                 playerId = th.a['href'].split('/')[3].replace('.html','')
                 name = th.text
-                print(f'NAME:   {name}')
-                print(f'WEIGHT: {weight}')
-                print(f'HEIGHT: {height}')
-                print(f'POSITION: {position}')
+                
 
 
                 apiURL = "http://127.0.0.1:5000/player/information?name=" + strip_accents(name.lower().strip().replace(" ","").replace("*",""))
-                print(apiURL)
                 try:
                     team = requests.get(apiURL).json()['Team']
                 except ValueError:
@@ -79,21 +74,7 @@ def urlMaker():
                 else:
                     team = team
 
-                print(f'NAME:     {name}')
-                print(f'WEIGHT:   {weight}')
-                print(f'HEIGHT:   {height}')
-                print(f'POSITION: {position}')
-                print(f'TEAM:     {team}')
 
-            
-                print(f'{name} , {weight}, {height}, {position}, {team}, {firstYear}, {lastYear}')
-
-                
-
-                print("")
-                print("")
-                print("")
-                print("")
                 '''f = open('playerNames1.txt','a')
                 f.write(f' "{name} {weight} {height} {position}", ')
                 f.close()
@@ -107,8 +88,8 @@ def urlMaker():
                 f.write(f' "{name} {position}", ')
                 f.close() '''
 
-                f = open('currentPlayerNamees.txt','a')
-                f.write(f' " {name} , {weight}, {height}, {position}, {team}, {firstYear}, {lastYear} " , ')
+                f = open('namesAsDict.txt','a')
+                f.write(f' "{name}": "{weight}, {height}, {position}, {team}, {firstYear}, {lastYear} " , ')
                 f.close()
 
                 
@@ -129,6 +110,3 @@ def urlMaker():
 
     return
 
-
-
-    

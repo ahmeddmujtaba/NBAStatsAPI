@@ -51,7 +51,6 @@ def gameLogs(playerID,year):
         counter += 1
 
 
-    print(stats['43'])
 
     # Return the dictionaries
     return(stats)

@@ -23,7 +23,7 @@ for team in teamNames:
         try:
             result = firebase.put(f'/bballdb-88bae/team/{team}/seasonStats/', stat, answer)
         except HTTPError:
-            print('pass')
+            print("Exception Occured")
 
         print()
         print()

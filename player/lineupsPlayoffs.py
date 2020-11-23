@@ -70,7 +70,6 @@ def lineupPlayoffs(playerID,year,man):
         counter += 1
 
     
-    print(stats)
     
     # Return the dictionaries
     return(stats)

@@ -64,7 +64,6 @@ def franchiseStats(url, teamName):
         stats[row] = teamStats[counter]
         counter += 1
 
-    print(stats)
     return(stats)
 
 

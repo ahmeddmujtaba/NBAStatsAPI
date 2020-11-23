@@ -51,8 +51,6 @@ def getTeamStartingLineups(teamName, year):
         stats[row] = teamStats[counter]
         counter += 1
 
-    print(stats['63'])
-
 
 
     # Return the dictionaries

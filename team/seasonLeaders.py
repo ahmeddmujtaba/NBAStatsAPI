@@ -66,6 +66,5 @@ def getFranchiseSeasonLeadersStats(year,teamName):
 
             
             
-    print(stats)
 
     return(stats)

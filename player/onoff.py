@@ -49,7 +49,6 @@ def onoff(playerID,year):
         counter += 1
 
 
-    print(stats)
 
     # Return the dictionaries
     return(stats)

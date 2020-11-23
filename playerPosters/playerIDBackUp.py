@@ -6,4 +6,3 @@ playerID = {
 
 }
 
-print(playerIDs["pascalsiakam"])

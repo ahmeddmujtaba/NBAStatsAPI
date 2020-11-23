@@ -8,7 +8,6 @@ from main.urlMaker import strip_accents
 def onoffPlayoffs(playerID,year):
     # Add year to the end of the URL
     url = f'https://www.basketball-reference.com/players/{playerID}/on-off/{year}'
-    print(url)
     page = requests.get(url)
 
     # Create a beautifulSoup object
@@ -51,7 +50,6 @@ def onoffPlayoffs(playerID,year):
         counter += 1
 
 
-    print(stats)
 
     # Return the dictionaries
     return(stats)

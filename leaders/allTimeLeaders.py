@@ -98,7 +98,6 @@ def allTimeCareerLeaders(type):
         stats[row] = teamStats[counter]
         counter += 1
 
-    print(stats)
 
 
 

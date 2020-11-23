@@ -1,8 +1,21 @@
 from bs4 import BeautifulSoup
 import requests
 import time
-from main.urlMaker import strip_accents
+import unicodedata
+#from main.urlMaker import strip_accents
 
+def strip_accents(text):
+
+    try:
+        text = unicode(text, 'utf-8')
+    except NameError: # unicode is a default on python 3 
+        pass
+
+    text = unicodedata.normalize('NFD', text)\
+           .encode('ascii', 'ignore')\
+           .decode("utf-8")
+
+    return str(text)
 
 # Create dictionary to keep reference of div names and headerRow numbers
 referenceDict  = {
@@ -31,10 +44,8 @@ def getStats(playerID,type):
     url = f'https://www.basketball-reference.com/players/{playerID}.html'
     page = requests.get(url)
 
-    print
-
     firstdiv = referenceDict[type][0]
-    print(firstdiv)
+
 
     headerRow = referenceDict[type][1]
 
@@ -53,7 +64,7 @@ def getStats(playerID,type):
     try:
         div = str(soup.find_all('div',id=firstdiv)[0])
     except IndexError:
-        return({'N/A':'N/A'})
+        return({"N/A":["N/A","N/A","N/A","N/A","N/A","N/A"],"NA":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"],"Legend":["N/A","N/A","N/A","N/A","N/A","N/A","N/A"]})
 
     # Get the commented out parts
     div = div.replace('-->','')
@@ -84,8 +95,9 @@ def getStats(playerID,type):
         try:
             rowHeaders += [strip_accents(row.find('th').text)]
         except AttributeError:
-            rowHeaders += []
+            rowHeaders += [row.findAll('td')[0].text]
 
+    
     # Create Dictionary
     stats = {}
 
@@ -100,6 +112,5 @@ def getStats(playerID,type):
 
     # Return the dictionaries
     return(stats)
-
 
 

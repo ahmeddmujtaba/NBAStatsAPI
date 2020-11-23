@@ -20,7 +20,6 @@ def strip_accents(text):
 def gameLogsPlayoffs(playerID,year):
     # Add year to the end of the URL
     url = f'https://www.basketball-reference.com/players/{playerID}/gamelog/{year}'
-    print(url)
     page = requests.get(url)
 
     # Create a beautifulSoup object

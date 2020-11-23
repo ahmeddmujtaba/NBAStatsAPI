@@ -67,7 +67,6 @@ def shooting(playerID,year):
 
     
 
-    print(stats['Legend'])
 
     # Return the dictionaries
     return(stats)

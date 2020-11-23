@@ -80,11 +80,7 @@ def getTeamLineups(teamName,divid,year):
         counter += 1
 
     
-    print(stats)
-
-    for key in stats.keys():
-        print(key)
-        print(stats[key])
+  
 
     # Return the dictionaries
     return(stats)

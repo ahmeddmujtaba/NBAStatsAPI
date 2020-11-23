@@ -64,7 +64,6 @@ def splits(playerID,year):
         counter += 1
 
 
-    print(stats['Legend'])
 
     # Return the dictionaries
     return(stats)

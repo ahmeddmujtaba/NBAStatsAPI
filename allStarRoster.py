@@ -34,7 +34,6 @@ def allStarRosters(year,type):
 
     for roster in rosters:
         captain = roster.find('caption').text
-        print(captain)
 
         statsToAdd = []
 
@@ -43,7 +42,6 @@ def allStarRosters(year,type):
 
         stats[captain] = statsToAdd
 
-    print(stats)
 
     return(stats)
 

@@ -98,13 +98,8 @@ def playoffSeasonLeaders(type):
         if counter == 51:
             break
         stats[counter] = teamStats[counter]
-        print(stats[counter])
         counter += 1
 
-    print(stats)
-
-    for key in stats.keys():
-        print(key, ': ', stats[key])
 
 
     # Return the dictionaries
